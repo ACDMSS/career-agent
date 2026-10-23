@@ -1,0 +1,1038 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="data:,">
+    <title>岗位需求反推 · 大学四年成长规划</title>
+    <style>
+        :root {
+            --bg: #f4f6fb;
+            --panel: #ffffff;
+            --border: #e2e6ef;
+            --text: #1f2937;
+            --muted: #6b7280;
+            --primary: #2f6fed;
+            --primary-dark: #2559c4;
+            --user-bubble: #2f6fed;
+            --assistant-bubble: #ffffff;
+            --danger: #c0392b;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+            margin: 0;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: "Microsoft YaHei", "PingFang SC", "Helvetica Neue", Arial, sans-serif;
+            font-size: 14px;
+            line-height: 1.65;
+        }
+
+        .app {
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* ---------- 左侧会话栏 ---------- */
+        .sidebar {
+            width: 240px;
+            flex: 0 0 240px;
+            display: flex;
+            flex-direction: column;
+            background: #1f2937;
+            color: #e5e7eb;
+        }
+
+        .brand {
+            padding: 18px 16px 10px;
+            font-size: 15px;
+            font-weight: 600;
+            letter-spacing: .3px;
+        }
+
+        .brand-sub {
+            padding: 0 16px 14px;
+            font-size: 12px;
+            color: #9aa4b2;
+        }
+
+        .new-chat {
+            margin: 0 12px 12px;
+            padding: 9px 12px;
+            border: 1px solid #3b4658;
+            border-radius: 8px;
+            background: #2b3648;
+            color: #f3f4f6;
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        .new-chat:hover {
+            background: #384558;
+        }
+
+        .conversation-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0 8px 8px;
+        }
+
+        .conversation-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            width: 100%;
+            padding: 8px 8px 8px 10px;
+            margin-bottom: 4px;
+            border-radius: 8px;
+            cursor: pointer;
+            color: #d1d5db;
+        }
+
+        .conversation-item:hover {
+            background: #2b3648;
+        }
+
+        .conversation-item.active {
+            background: #334760;
+            color: #ffffff;
+        }
+
+        .conversation-title {
+            flex: 1;
+            min-width: 0;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            font-size: 13px;
+        }
+
+        .conversation-time {
+            display: block;
+            font-size: 11px;
+            color: #8b95a5;
+        }
+
+        .delete-chat {
+            flex: 0 0 auto;
+            border: none;
+            background: transparent;
+            color: #8b95a5;
+            font-size: 12px;
+            cursor: pointer;
+            padding: 2px 4px;
+            border-radius: 4px;
+        }
+
+        .delete-chat:hover {
+            background: rgba(255, 255, 255, .12);
+            color: #ffffff;
+        }
+
+        .sidebar-footer {
+            padding: 10px 16px 14px;
+            font-size: 11px;
+            color: #7f8a9a;
+            border-top: 1px solid #2f3a4b;
+        }
+
+        /* ---------- 右侧主区域 ---------- */
+        .main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+
+        .topbar {
+            background: var(--panel);
+            border-bottom: 1px solid var(--border);
+            padding: 10px 16px 12px;
+        }
+
+        .profile-form {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 8px 12px;
+        }
+
+        .field {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            font-size: 12px;
+            color: var(--muted);
+        }
+
+        .field input,
+        .field select {
+            height: 32px;
+            padding: 4px 8px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 13px;
+            color: var(--text);
+            background: #fff;
+            outline: none;
+        }
+
+        .field input:focus,
+        .field select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(47, 111, 237, .12);
+        }
+
+        .field input.invalid {
+            border-color: var(--danger);
+        }
+
+        .quick-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+
+        .quick-actions button {
+            padding: 7px 14px;
+            border-radius: 16px;
+            border: 1px solid var(--primary);
+            background: #eef3ff;
+            color: var(--primary-dark);
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        .quick-actions button:hover {
+            background: #dfe8ff;
+        }
+
+        .quick-actions button:disabled {
+            opacity: .55;
+            cursor: not-allowed;
+        }
+
+        .chat {
+            flex: 1;
+            overflow-y: auto;
+            padding: 18px 16px 8px;
+        }
+
+        .chat-inner {
+            max-width: 860px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .empty-state {
+            max-width: 620px;
+            margin: 40px auto;
+            padding: 20px 24px;
+            background: #ffffff;
+            border: 1px dashed var(--border);
+            border-radius: 12px;
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .empty-state h2 {
+            margin: 0 0 8px;
+            font-size: 16px;
+            color: var(--text);
+        }
+
+        .empty-state ol {
+            margin: 0;
+            padding-left: 20px;
+        }
+
+        .message {
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+        }
+
+        .message.user {
+            flex-direction: row-reverse;
+        }
+
+        .avatar {
+            flex: 0 0 30px;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            color: #fff;
+            background: #9aa4b2;
+        }
+
+        .message.user .avatar {
+            background: var(--primary);
+        }
+
+        .message.assistant .avatar {
+            background: #2f9e73;
+        }
+
+        .bubble {
+            max-width: 78%;
+            padding: 10px 13px;
+            border-radius: 12px;
+            white-space: pre-wrap;
+            word-break: break-word;
+            text-align: left;
+            line-height: 1.75;
+        }
+
+        .message.user .bubble {
+            background: var(--user-bubble);
+            color: #ffffff;
+            border-top-right-radius: 4px;
+        }
+
+        .message.assistant .bubble {
+            background: var(--assistant-bubble);
+            border: 1px solid var(--border);
+            border-top-left-radius: 4px;
+        }
+
+        .bubble.error {
+            border-color: #f0c2bb;
+            background: #fdf2f0;
+            color: var(--danger);
+        }
+
+        .bubble.streaming::after {
+            content: "▍";
+            color: #94a3b8;
+            animation: blink 1s steps(1) infinite;
+        }
+
+        @keyframes blink {
+            50% {
+                opacity: 0;
+            }
+        }
+
+        .composer {
+            border-top: 1px solid var(--border);
+            background: var(--panel);
+            padding: 10px 16px 14px;
+        }
+
+        .composer-inner {
+            max-width: 860px;
+            margin: 0 auto;
+            display: flex;
+            gap: 8px;
+            align-items: flex-end;
+        }
+
+        #message-input {
+            flex: 1;
+            min-height: 42px;
+            max-height: 160px;
+            padding: 10px 12px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            font-family: inherit;
+            font-size: 14px;
+            line-height: 1.5;
+            resize: none;
+            outline: none;
+        }
+
+        #message-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(47, 111, 237, .12);
+        }
+
+        #send-btn {
+            flex: 0 0 auto;
+            height: 42px;
+            padding: 0 20px;
+            border: none;
+            border-radius: 10px;
+            background: var(--primary);
+            color: #fff;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        #send-btn:hover {
+            background: var(--primary-dark);
+        }
+
+        #send-btn:disabled {
+            opacity: .55;
+            cursor: not-allowed;
+        }
+
+        .notice {
+            max-width: 860px;
+            margin: 0 auto 8px;
+            padding: 7px 10px;
+            border-radius: 6px;
+            background: #fdf2f0;
+            color: var(--danger);
+            font-size: 12px;
+        }
+
+        .notice[hidden] {
+            display: none;
+        }
+
+        /* ---------- 修改条件对话框 ---------- */
+        dialog {
+            border: none;
+            border-radius: 12px;
+            padding: 0;
+            width: 360px;
+            max-width: 92vw;
+            box-shadow: 0 18px 46px rgba(15, 23, 42, .28);
+        }
+
+        dialog::backdrop {
+            background: rgba(15, 23, 42, .45);
+        }
+
+        .dialog-body {
+            padding: 18px 20px 20px;
+        }
+
+        .dialog-body h3 {
+            margin: 0 0 4px;
+            font-size: 15px;
+        }
+
+        .dialog-hint {
+            margin: 0 0 14px;
+            font-size: 12px;
+            color: var(--muted);
+        }
+
+        .dialog-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            margin-top: 16px;
+        }
+
+        .dialog-actions button {
+            padding: 7px 14px;
+            border-radius: 8px;
+            font-size: 13px;
+            cursor: pointer;
+            border: 1px solid var(--border);
+            background: #fff;
+        }
+
+        .dialog-actions .confirm {
+            border-color: var(--primary);
+            background: var(--primary);
+            color: #fff;
+        }
+
+        @media (max-width: 760px) {
+            .sidebar {
+                display: none;
+            }
+
+            .bubble {
+                max-width: 88%;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="app">
+    <aside class="sidebar">
+        <div class="brand">岗位反推 · 成长规划</div>
+        <div class="brand-sub">从岗位需求倒推大学四年路线</div>
+        <button id="new-chat-btn" class="new-chat" type="button">＋ 新建对话</button>
+        <div id="conversation-list" class="conversation-list"></div>
+        <div class="sidebar-footer">聊天记录只保存在本浏览器</div>
+    </aside>
+
+    <main class="main">
+        <header class="topbar">
+            <form id="profile-form" class="profile-form" autocomplete="off">
+                <label class="field">专业
+                    <input id="major" type="text" placeholder="如：计算机类">
+                </label>
+                <label class="field">当前年级
+                    <select id="grade">
+                        <option>大一</option>
+                        <option>大二</option>
+                        <option>大三</option>
+                        <option>大四</option>
+                        <option>研一</option>
+                        <option>研二</option>
+                    </select>
+                </label>
+                <label class="field">目标岗位
+                    <input id="target-role" type="text" placeholder="如：Java 后端开发">
+                </label>
+                <label class="field">已掌握技能
+                    <input id="known-skills" type="text" placeholder="用顿号或逗号分隔">
+                </label>
+                <label class="field">每周可投入时间（小时）
+                    <input id="weekly-hours" type="number" min="0" max="80" step="1" placeholder="如：8">
+                </label>
+                <label class="field">发展方向
+                    <select id="career-path">
+                        <option>就业</option>
+                        <option>考研</option>
+                        <option>保研</option>
+                        <option>出国</option>
+                        <option>未定</option>
+                    </select>
+                </label>
+            </form>
+            <div class="quick-actions">
+                <button id="plan-btn" type="button">生成成长规划</button>
+                <button id="adjust-btn" type="button">修改学习条件</button>
+            </div>
+        </header>
+
+        <section id="chat" class="chat" aria-live="polite"></section>
+
+        <footer class="composer">
+            <div id="notice" class="notice" hidden></div>
+            <div class="composer-inner">
+                <textarea id="message-input" rows="1"
+                          placeholder="例如：帮我看看现在的能力距离目标岗位还差什么？（Enter 发送，Shift+Enter 换行）"></textarea>
+                <button id="send-btn" type="button">发送</button>
+            </div>
+        </footer>
+    </main>
+</div>
+
+<dialog id="adjust-dialog">
+    <form method="dialog" class="dialog-body" id="adjust-form">
+        <h3>修改学习条件</h3>
+        <p class="dialog-hint">修改后会在当前对话里重新检索岗位资料并调整优先级。</p>
+        <label class="field">目标岗位
+            <input id="adjust-role" type="text" placeholder="如：AI 应用开发">
+        </label>
+        <label class="field" style="margin-top:10px;">每周可投入时间（小时）
+            <input id="adjust-hours" type="number" min="0" max="80" step="1">
+        </label>
+        <div class="dialog-actions">
+            <button type="button" id="adjust-cancel">取消</button>
+            <button type="submit" class="confirm" id="adjust-confirm">应用并重新规划</button>
+        </div>
+    </form>
+</dialog>
+
+<script>
+    // ===== 常量与基础状态 =====
+    const STORAGE_KEY = 'career-agent-state-v1';
+
+    const state = {
+        conversations: [],
+        currentId: null,
+        profile: {
+            major: '',
+            grade: '大二',
+            targetRole: '',
+            knownSkills: '',
+            weeklyHours: 8,
+            careerPath: '就业'
+        },
+        streaming: false
+    };
+
+    const el = {
+        chat: document.getElementById('chat'),
+        list: document.getElementById('conversation-list'),
+        notice: document.getElementById('notice'),
+        input: document.getElementById('message-input'),
+        sendBtn: document.getElementById('send-btn'),
+        newChatBtn: document.getElementById('new-chat-btn'),
+        planBtn: document.getElementById('plan-btn'),
+        adjustBtn: document.getElementById('adjust-btn'),
+        dialog: document.getElementById('adjust-dialog'),
+        adjustRole: document.getElementById('adjust-role'),
+        adjustHours: document.getElementById('adjust-hours'),
+        adjustCancel: document.getElementById('adjust-cancel'),
+        profileForm: document.getElementById('profile-form'),
+        major: document.getElementById('major'),
+        grade: document.getElementById('grade'),
+        targetRole: document.getElementById('target-role'),
+        knownSkills: document.getElementById('known-skills'),
+        weeklyHours: document.getElementById('weekly-hours'),
+        careerPath: document.getElementById('career-path')
+    };
+
+    // ===== 存储：会话列表、当前会话、学生档案都放在 localStorage =====
+    function saveState() {
+        try {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify({
+                conversations: state.conversations,
+                currentId: state.currentId,
+                profile: state.profile
+            }));
+        } catch (error) {
+            showNotice('浏览器本地存储不可用，刷新后聊天记录可能丢失。');
+        }
+    }
+
+    function loadState() {
+        let saved = null;
+        try {
+            saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
+        } catch (error) {
+            saved = null;
+        }
+        if (!saved) {
+            return;
+        }
+        if (Array.isArray(saved.conversations)) {
+            state.conversations = saved.conversations.filter(item => item && item.memoryId);
+        }
+        if (saved.profile) {
+            state.profile = Object.assign(state.profile, saved.profile);
+        }
+        if (saved.currentId && state.conversations.some(item => item.memoryId === saved.currentId)) {
+            state.currentId = saved.currentId;
+        }
+    }
+
+    // ===== 工具函数 =====
+    function nowIso() {
+        return new Date().toISOString();
+    }
+
+    function newMemoryId() {
+        if (window.crypto && typeof window.crypto.randomUUID === 'function') {
+            return window.crypto.randomUUID();
+        }
+        // 老浏览器的兜底：时间戳 + 随机串，保证每段对话唯一
+        return 'conv-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 10);
+    }
+
+    function currentConversation() {
+        return state.conversations.find(item => item.memoryId === state.currentId) || null;
+    }
+
+    function formatTime(iso) {
+        const date = new Date(iso);
+        if (Number.isNaN(date.getTime())) {
+            return '';
+        }
+        const pad = value => String(value).padStart(2, '0');
+        return (date.getMonth() + 1) + '/' + date.getDate() + ' ' + pad(date.getHours()) + ':' + pad(date.getMinutes());
+    }
+
+    function showNotice(text) {
+        el.notice.textContent = text;
+        el.notice.hidden = false;
+    }
+
+    function clearNotice() {
+        el.notice.hidden = true;
+        el.notice.textContent = '';
+    }
+
+    function scrollToBottom() {
+        el.chat.scrollTop = el.chat.scrollHeight;
+    }
+
+    // 去掉模型输出里可能残留的 Markdown 符号，保持纯文本整洁
+    function cleanAssistantText(text) {
+        return (text || '')
+            .replace(/^#{1,6}\s*/gm, '')
+            .replace(/\*\*(.+?)\*\*/g, '$1')
+            .replace(/^\s*[-*]\s+/gm, '- ')
+            .replace(/^\s*-{3,}\s*$/gm, '')
+            .replace(/`{1,3}/g, '');
+    }
+
+    function setBusy(busy) {
+        state.streaming = busy;
+        el.sendBtn.disabled = busy;
+        el.planBtn.disabled = busy;
+        el.adjustBtn.disabled = busy;
+        el.newChatBtn.disabled = busy;
+        el.sendBtn.textContent = busy ? '生成中…' : '发送';
+    }
+
+    // ===== 会话管理 =====
+    function createConversation() {
+        const conversation = {
+            memoryId: newMemoryId(),
+            title: '新对话',
+            createdAt: nowIso(),
+            updatedAt: nowIso(),
+            messages: []
+        };
+        state.conversations.unshift(conversation);
+        state.currentId = conversation.memoryId;
+        saveState();
+        renderConversationList();
+        renderChat();
+        return conversation;
+    }
+
+    function ensureConversation() {
+        return currentConversation() || createConversation();
+    }
+
+    function selectConversation(memoryId) {
+        if (state.streaming) {
+            return;
+        }
+        state.currentId = memoryId;
+        saveState();
+        renderConversationList();
+        renderChat();
+    }
+
+    function deleteConversation(memoryId) {
+        if (state.streaming) {
+            return;
+        }
+        // 只删除浏览器记录，不涉及服务端数据
+        state.conversations = state.conversations.filter(item => item.memoryId !== memoryId);
+        if (state.currentId === memoryId) {
+            state.currentId = state.conversations.length ? state.conversations[0].memoryId : null;
+        }
+        if (!state.conversations.length) {
+            createConversation();
+            return;
+        }
+        saveState();
+        renderConversationList();
+        renderChat();
+    }
+
+    function renderConversationList() {
+        el.list.textContent = '';
+        state.conversations.forEach(conversation => {
+            const item = document.createElement('div');
+            item.className = 'conversation-item' + (conversation.memoryId === state.currentId ? ' active' : '');
+            item.addEventListener('click', () => selectConversation(conversation.memoryId));
+
+            const textWrap = document.createElement('div');
+            textWrap.className = 'conversation-title';
+            textWrap.textContent = conversation.title || '新对话';
+
+            const time = document.createElement('span');
+            time.className = 'conversation-time';
+            time.textContent = formatTime(conversation.updatedAt);
+            textWrap.appendChild(time);
+
+            const remove = document.createElement('button');
+            remove.type = 'button';
+            remove.className = 'delete-chat';
+            remove.textContent = '删除';
+            remove.addEventListener('click', event => {
+                event.stopPropagation();
+                deleteConversation(conversation.memoryId);
+            });
+
+            item.appendChild(textWrap);
+            item.appendChild(remove);
+            el.list.appendChild(item);
+        });
+    }
+
+    // ===== 渲染聊天记录（只用 textContent，避免把模型输出当 HTML 执行） =====
+    function renderChat() {
+        el.chat.textContent = '';
+        const inner = document.createElement('div');
+        inner.className = 'chat-inner';
+        el.chat.appendChild(inner);
+
+        const conversation = currentConversation();
+        if (!conversation || !conversation.messages.length) {
+            const empty = document.createElement('div');
+            empty.className = 'empty-state';
+            const title = document.createElement('h2');
+            title.textContent = '先填档案，再点“生成成长规划”';
+            const steps = document.createElement('ol');
+            ['填写专业、年级、目标岗位、已掌握技能和每周可投入时间。',
+                '点击“生成成长规划”，系统会检索本地岗位资料并给出能力差距和路线。',
+                '想换目标岗位或调整时间，点“修改学习条件”，在同一段对话里继续问。'
+            ].forEach(text => {
+                const li = document.createElement('li');
+                li.textContent = text;
+                steps.appendChild(li);
+            });
+            empty.appendChild(title);
+            empty.appendChild(steps);
+            inner.appendChild(empty);
+            return;
+        }
+
+        conversation.messages.forEach(message => {
+            appendMessageElement(message.role, message.content, message.error === true);
+        });
+        scrollToBottom();
+    }
+
+    function appendMessageElement(role, content, isError) {
+        const inner = el.chat.querySelector('.chat-inner');
+        const wrapper = document.createElement('div');
+        wrapper.className = 'message ' + (role === 'user' ? 'user' : 'assistant');
+
+        const avatar = document.createElement('div');
+        avatar.className = 'avatar';
+        avatar.textContent = role === 'user' ? '我' : 'AI';
+
+        const bubble = document.createElement('div');
+        bubble.className = 'bubble' + (isError ? ' error' : '');
+        bubble.textContent = role === 'assistant' && !isError ? cleanAssistantText(content) : content;
+
+        wrapper.appendChild(avatar);
+        wrapper.appendChild(bubble);
+        inner.appendChild(wrapper);
+        scrollToBottom();
+        return bubble;
+    }
+
+    // ===== 学生档案 =====
+    function fillProfileForm() {
+        el.major.value = state.profile.major || '';
+        el.grade.value = state.profile.grade || '大二';
+        el.targetRole.value = state.profile.targetRole || '';
+        el.knownSkills.value = state.profile.knownSkills || '';
+        el.weeklyHours.value = state.profile.weeklyHours ?? '';
+        el.careerPath.value = state.profile.careerPath || '就业';
+    }
+
+    function readProfileForm() {
+        state.profile = {
+            major: el.major.value.trim(),
+            grade: el.grade.value,
+            targetRole: el.targetRole.value.trim(),
+            knownSkills: el.knownSkills.value.trim(),
+            weeklyHours: el.weeklyHours.value === '' ? null : Number(el.weeklyHours.value),
+            careerPath: el.careerPath.value
+        };
+        saveState();
+    }
+
+    function buildProfilePayload() {
+        const skills = state.profile.knownSkills
+            ? state.profile.knownSkills.split(/[、,，;；/\s]+/).map(item => item.trim()).filter(item => item)
+            : [];
+        return {
+            major: state.profile.major,
+            grade: state.profile.grade,
+            targetRole: state.profile.targetRole,
+            knownSkills: skills,
+            weeklyHours: state.profile.weeklyHours,
+            careerPath: state.profile.careerPath
+        };
+    }
+
+    function validateProfile() {
+        el.targetRole.classList.remove('invalid');
+        if (!state.profile.targetRole) {
+            el.targetRole.classList.add('invalid');
+            el.targetRole.focus();
+            showNotice('请先填写“目标岗位”，例如：Java 后端开发、AI 应用开发。');
+            return false;
+        }
+        clearNotice();
+        return true;
+    }
+
+    // ===== 发送消息 + 流式接收 =====
+    async function sendMessage(text) {
+        if (state.streaming) {
+            return;
+        }
+        const content = (text || '').trim();
+        if (!content) {
+            return;
+        }
+        readProfileForm();
+        if (!validateProfile()) {
+            return;
+        }
+
+        const conversation = ensureConversation();
+        const userMessage = { role: 'user', content: content, createdAt: nowIso() };
+        conversation.messages.push(userMessage);
+        conversation.updatedAt = nowIso();
+        if (conversation.title === '新对话') {
+            conversation.title = state.profile.targetRole
+                ? state.profile.targetRole + ' · 规划'
+                : content.slice(0, 20);
+        }
+        saveState();
+        renderChat();
+        renderConversationList();
+
+        el.input.value = '';
+        resizeInput();
+        setBusy(true);
+
+        const bubble = appendMessageElement('assistant', '');
+        bubble.classList.add('streaming');
+        bubble.textContent = '正在检索岗位资料并生成回答…';
+        scrollToBottom();
+
+        let answer = '';
+        let failed = false;
+
+        try {
+            const response = await fetch('/api/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    memoryId: conversation.memoryId,
+                    message: content,
+                    profile: buildProfilePayload()
+                })
+            });
+
+            if (!response.ok) {
+                const detail = await response.text();
+                throw new Error(detail || ('HTTP ' + response.status));
+            }
+            if (!response.body) {
+                throw new Error('当前浏览器不支持流式读取。');
+            }
+
+            bubble.textContent = '';
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder('utf-8');
+
+            while (true) {
+                const chunk = await reader.read();
+                if (chunk.done) {
+                    break;
+                }
+                answer += decoder.decode(chunk.value, { stream: true });
+                bubble.textContent = cleanAssistantText(answer);
+                scrollToBottom();
+            }
+            answer += decoder.decode();
+            bubble.textContent = cleanAssistantText(answer);
+
+            if (!answer.trim()) {
+                throw new Error('服务端没有返回内容，请稍后重试。');
+            }
+        } catch (error) {
+            failed = true;
+            const hint = '请求未完成：' + (error.message || '网络异常') + '\n（这不是 AI 回答，请检查后端是否启动、OPENAI_API_KEY 是否配置正确。）';
+            bubble.textContent = hint;
+            bubble.classList.add('error');
+            showNotice('请求失败，请检查后端服务或 API Key 配置后重试。');
+            answer = hint;
+        } finally {
+            bubble.classList.remove('streaming');
+            setBusy(false);
+            conversation.messages.push({
+                role: 'assistant',
+                content: answer,
+                createdAt: nowIso(),
+                error: failed
+            });
+            conversation.updatedAt = nowIso();
+            saveState();
+            renderConversationList();
+            scrollToBottom();
+        }
+    }
+
+    function resizeInput() {
+        el.input.style.height = 'auto';
+        el.input.style.height = Math.min(el.input.scrollHeight, 160) + 'px';
+    }
+
+    // ===== 快捷操作 =====
+    function generatePlan() {
+        readProfileForm();
+        if (!validateProfile()) {
+            return;
+        }
+        sendMessage('请根据我的学生档案生成一份完整的成长规划：先给出目标岗位画像和高频核心能力，再分析我的能力差距与优先级，并按当前学期、下一学期和后续阶段安排学习路线。');
+    }
+
+    function openAdjustDialog() {
+        readProfileForm();
+        el.adjustRole.value = state.profile.targetRole || '';
+        el.adjustHours.value = state.profile.weeklyHours ?? '';
+        el.dialog.showModal();
+    }
+
+    function applyAdjust() {
+        el.targetRole.value = el.adjustRole.value.trim();
+        el.weeklyHours.value = el.adjustHours.value;
+        readProfileForm();
+        if (!validateProfile()) {
+            el.dialog.close();
+            return;
+        }
+        const hoursText = state.profile.weeklyHours === null ? '未指定' : state.profile.weeklyHours + ' 小时/周';
+        el.dialog.close();
+        // 仍在同一段对话（同一个 memoryId）里继续提问
+        sendMessage('我把学习条件调整为：目标岗位「' + state.profile.targetRole + '」，每周可投入时间 ' + hoursText
+            + '。请重新检索岗位资料，说明哪些学习内容需要提前、哪些需要推迟、哪些可以取消，并更新分阶段成长路线。');
+    }
+
+    // ===== 事件绑定 =====
+    el.profileForm.addEventListener('input', () => {
+        readProfileForm();
+        clearNotice();
+    });
+    el.profileForm.addEventListener('submit', event => event.preventDefault());
+
+    el.sendBtn.addEventListener('click', () => sendMessage(el.input.value));
+    el.newChatBtn.addEventListener('click', () => {
+        if (state.streaming) {
+            return;
+        }
+        createConversation();
+    });
+    el.planBtn.addEventListener('click', generatePlan);
+    el.adjustBtn.addEventListener('click', openAdjustDialog);
+    el.adjustCancel.addEventListener('click', () => el.dialog.close());
+    document.getElementById('adjust-form').addEventListener('submit', event => {
+        event.preventDefault();
+        applyAdjust();
+    });
+
+    el.input.addEventListener('keydown', event => {
+        if (event.key === 'Enter' && !event.shiftKey) {
+            event.preventDefault();
+            sendMessage(el.input.value);
+        }
+    });
+    el.input.addEventListener('input', resizeInput);
+
+    // ===== 启动 =====
+    loadState();
+    fillProfileForm();
+    if (!state.conversations.length) {
+        createConversation();
+    } else {
+        if (!state.currentId) {
+            state.currentId = state.conversations[0].memoryId;
+        }
+        renderConversationList();
+        renderChat();
+    }
+    resizeInput();
+</script>
+</body>
+</html>
