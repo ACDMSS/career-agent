@@ -36,6 +36,11 @@ build/
 application-local.yaml
 *.log
 
+### 可重新生成的产物（不要提交） ###
+/maven-repo/
+/tools/
+/dist/
+
 ### 操作系统 ###
 .DS_Store
 Thumbs.db
