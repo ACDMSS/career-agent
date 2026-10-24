@@ -1,0 +1,24 @@
+岗位名称：AI Agent开发工程师
+公司：金证科技
+岗位方向：ai-application/ai-agent
+来源：南方科技大学就业信息网，大模型应用开发工程师（Agent方向）职位
+日期：2026-08-25
+
+岗位职责
+参与AI Agent系统的核心模块开发，重点包括任务规划（Planning）、工具调用（ToolUse）、记忆管理（Memory）与多轮对话编排。
+设计Agent的工具链与函数编排机制：工具注册、参数校验、调用链路与异常处理。
+构建长短期记忆系统，管理Agent在跨会话场景中的上下文一致性与知识累积。
+参与Agent交互界面的开发，实现任务过程的可视化与用户可干预的操作体验。
+跟进LangChain、OpenClaw、Hermes等前沿Agent框架，做技术验证并输出结论，推动框架选型在团队内的落地。
+
+任职要求
+硕士及以上，计算机、软件工程、人工智能等相关专业（部分校招岗位对特别优秀的本科生开放）。
+熟练掌握Python，理解Web服务基本原理，有FastAPI/Flask/Django任一框架的项目实践。
+调用过主流大模型API，理解Prompt工程与FunctionCalling的基本机制。
+了解ReAct、ToolUse、Memory、Multi-Agent等Agent核心概念，能清晰解释一个Agent从“接收任务”到“调用工具”再到“返回结果”的完整链路。
+具备清晰的问题拆解能力，能把一个模糊的复杂任务拆成可被Agent执行的步骤序列。
+
+加分项
+有课程项目、实习或个人项目中实际搭建过具备工具调用或多轮记忆能力的Agent。
+了解MCP（ModelContextProtocol）等工具调用协议。有ReAct、Plan-and-Execute等Agent推理模式的实践经验。
+了解多Agent协同与路由调度的基本思路。
