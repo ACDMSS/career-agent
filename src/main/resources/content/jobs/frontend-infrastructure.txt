@@ -1,6 +1,6 @@
 岗位名称：前端工程化实习生/前端基础设施开发（偏工具链与平台）
-公司：哔哩哔哩（前端实习生岗位中明确包含“参与前端工程化建设”）；4399（岗位要求中明确“熟悉前端模块化、组件化、工程化思想”）；TikTok（Frontend Infrastructure Engineer，可作为该细分方向在国际团队中的对标）
-来源：B站校园招聘前端实习生职位；4399“2026实习·Web前端开发实习生”职位；TikTok Client Arch 团队 Frontend Infrastructure Engineer职位
+公司：哔哩哔哩（前端实习生岗位中明确包含“参与前端工程化建设”）
+来源：https://jobs.bilibili.com/campus/positions/30812?type=0
 日期：2026-10/2026-05/2026-07
 
 岗位职责
