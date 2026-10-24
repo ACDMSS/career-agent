@@ -2,7 +2,7 @@
 公司：字节跳动（视频与边缘部门，北京）
 岗位方向：audio-video/streaming-infrastructure
 来源：https://jobs.bytedance.com/campus/position/7594426058519087413/detail
-日期：ByteIntern2027届（访问日期2026-10-24）
+日期：ByteIntern2027届
 
 岗位职责
 设计和开发高性能流媒体服务器，支持多种流媒体协议，支撑大规模组网。
