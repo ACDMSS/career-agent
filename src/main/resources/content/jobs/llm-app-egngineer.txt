@@ -1,7 +1,7 @@
 岗位名称：大模型应用工程师（RAG/微调方向）
-公司：慧辰资道（示例，非虚构指向，下同）
+公司：慧辰资道
 岗位方向：ai-application/llm-application
-来源：南开大学就业信息网，大模型应用开发工程师职位
+来源：https://career.nankai.edu.cn/correcruit/content/id/119530.html
 日期：2026-10-08
 
 岗位职责
